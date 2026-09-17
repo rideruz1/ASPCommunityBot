@@ -20,8 +20,6 @@ TELEGRAM_CHANNEL = "https://t.me/asp_community"
 CHANNEL_USERNAME = "@asp_community"
 ADMIN_USERNAME = "https://t.me/Solh09"
 
-BANNER_FILE = "asp_banner.png"
-
 
 # ==================================================
 # RENDER HEALTH CHECK
@@ -40,6 +38,7 @@ class HealthHandler(BaseHTTPRequestHandler):
 
 
 def run_health_server():
+
     port = int(os.environ.get("PORT", 10000))
 
     server = HTTPServer(
@@ -154,7 +153,7 @@ async def is_subscribed(bot, user_id):
 
 
 # ==================================================
-# WELCOME MATNI
+# WELCOME TEXT
 # ==================================================
 
 def welcome_text(user):
@@ -178,7 +177,7 @@ def welcome_text(user):
 
 
 # ==================================================
-# OBUNA KERAK XABARI
+# OBUNA XABARI
 # ==================================================
 
 def subscription_text():
@@ -200,44 +199,29 @@ def subscription_text():
 # START
 # ==================================================
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def start(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
 
     user = update.effective_user
-
-    # ----------------------------------------------
-    # OBUNA YO‘Q
-    # ----------------------------------------------
 
     if not await is_subscribed(
         context.bot,
         user.id
     ):
 
-        await update.message.reply_photo(
-
-            photo=open(BANNER_FILE, "rb"),
-
-            caption=subscription_text(),
-
+        await update.message.reply_text(
+            subscription_text(),
             parse_mode="HTML",
-
             reply_markup=subscription_keyboard()
         )
 
         return
 
-    # ----------------------------------------------
-    # OBUNA BOR
-    # ----------------------------------------------
-
-    await update.message.reply_photo(
-
-        photo=open(BANNER_FILE, "rb"),
-
-        caption=welcome_text(user),
-
+    await update.message.reply_text(
+        welcome_text(user),
         parse_mode="HTML",
-
         reply_markup=main_keyboard()
     )
 
@@ -259,11 +243,8 @@ async def help_command(
     ):
 
         await update.message.reply_text(
-
             subscription_text(),
-
             parse_mode="HTML",
-
             reply_markup=subscription_keyboard()
         )
 
@@ -284,11 +265,8 @@ async def help_command(
     )
 
     await update.message.reply_text(
-
         text,
-
         parse_mode="HTML",
-
         reply_markup=main_keyboard()
     )
 
@@ -312,47 +290,32 @@ async def button_handler(
 
     if query.data == "check_subscription":
 
-        subscribed = await is_subscribed(
+        if await is_subscribed(
             context.bot,
             user.id
-        )
-
-        # ----------------------------------------------
-        # OBUNA BOR
-        # ----------------------------------------------
-
-        if subscribed:
+        ):
 
             await query.answer(
                 "✅ Obuna tasdiqlandi!"
             )
 
-            await query.edit_message_caption(
-
-                caption=welcome_text(user),
-
+            await query.edit_message_text(
+                welcome_text(user),
                 parse_mode="HTML",
-
                 reply_markup=main_keyboard()
             )
-
-        # ----------------------------------------------
-        # OBUNA YO‘Q
-        # ----------------------------------------------
 
         else:
 
             await query.answer(
-
                 "❌ Avval Telegram kanalga obuna bo‘ling!",
-
                 show_alert=True
             )
 
         return
 
     # ==================================================
-    # QOLGAN TUGMALAR UCHUN OBUNA TEKSHIRISH
+    # BOSHQA TUGMALAR UCHUN OBUNA
     # ==================================================
 
     if not await is_subscribed(
@@ -361,9 +324,7 @@ async def button_handler(
     ):
 
         await query.answer(
-
             "❌ Avval kanalga obuna bo‘ling!",
-
             show_alert=True
         )
 
@@ -377,12 +338,9 @@ async def button_handler(
 
         await query.answer()
 
-        await query.edit_message_caption(
-
-            caption=welcome_text(user),
-
+        await query.edit_message_text(
+            welcome_text(user),
             parse_mode="HTML",
-
             reply_markup=main_keyboard()
         )
 
@@ -396,9 +354,7 @@ async def button_handler(
 
         text = (
             "👤 <b>Profil</b>\n\n"
-
             f"🆔 ID: <code>{user.id}</code>\n"
-
             f"👤 Ism: {user.first_name}\n"
         )
 
@@ -410,12 +366,9 @@ async def button_handler(
 
         text += "\n💙 <b>ASP Community</b>"
 
-        await query.edit_message_caption(
-
-            caption=text,
-
+        await query.edit_message_text(
+            text,
             parse_mode="HTML",
-
             reply_markup=InlineKeyboardMarkup([
                 [
                     InlineKeyboardButton(
@@ -444,12 +397,9 @@ async def button_handler(
             "📞 Aloqa — administrator."
         )
 
-        await query.edit_message_caption(
-
-            caption=text,
-
+        await query.edit_message_text(
+            text,
             parse_mode="HTML",
-
             reply_markup=InlineKeyboardMarkup([
                 [
                     InlineKeyboardButton(
@@ -472,21 +422,22 @@ async def button_handler(
             "📜 <b>ASP Community Qoidalari</b>\n\n"
 
             "1️⃣ Bir-biringizni hurmat qiling.\n\n"
+
             "2️⃣ Spam va flood taqiqlanadi.\n\n"
+
             "3️⃣ Reklama faqat ruxsat bilan.\n\n"
+
             "4️⃣ Haqorat va toxic xatti-harakatlarga "
             "yo‘l qo‘yilmaydi.\n\n"
+
             "5️⃣ Administratorlar qaroriga rioya qiling.\n\n"
 
             "🤝 <b>Hammaga yaxshi muhit yaratamiz!</b>"
         )
 
-        await query.edit_message_caption(
-
-            caption=text,
-
+        await query.edit_message_text(
+            text,
             parse_mode="HTML",
-
             reply_markup=InlineKeyboardMarkup([
                 [
                     InlineKeyboardButton(
@@ -512,22 +463,13 @@ def main():
 
         return
 
-    # ----------------------------------------------
-    # RENDER SERVER
-    # ----------------------------------------------
-
+    # Render server
     threading.Thread(
-
         target=run_health_server,
-
         daemon=True
-
     ).start()
 
-    # ----------------------------------------------
-    # TELEGRAM BOT
-    # ----------------------------------------------
-
+    # Telegram bot
     application = (
         Application
         .builder()
@@ -535,7 +477,7 @@ def main():
         .build()
     )
 
-    # START
+    # /start
     application.add_handler(
         CommandHandler(
             "start",
@@ -543,7 +485,7 @@ def main():
         )
     )
 
-    # HELP
+    # /help
     application.add_handler(
         CommandHandler(
             "help",
@@ -551,7 +493,7 @@ def main():
         )
     )
 
-    # BUTTONS
+    # Tugmalar
     application.add_handler(
         CallbackQueryHandler(
             button_handler
@@ -559,10 +501,6 @@ def main():
     )
 
     print("🤖 ASP Community Bot ishga tushdi!")
-
-    # ----------------------------------------------
-    # POLLING
-    # ----------------------------------------------
 
     application.run_polling(
         drop_pending_updates=True
